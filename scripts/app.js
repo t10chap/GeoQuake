@@ -1,5 +1,5 @@
 // define globals
-var weekly_quakes_endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
+var weekly_quakes_endpoint = "http://geocoder.default.dev.gswkbook.com"
 
 $(document).ready(function() {
   console.log("Let's get coding!");
@@ -20,9 +20,8 @@ $(document).ready(function() {
       center: {lat: 37.78, lng: -122.44},
       zoom: 2
     });
-    for(let i = 0; i < response.features.length; i++){
-      pinLocation = response.features[i].geometry.coordinates;
-      var latLng = new google.maps.LatLng(pinLocation[1],pinLocation[0]);
+    for(let i = 0; i < response.length; i++){
+      var latLng = new google.maps.LatLng(response[i].lat,response[i].lon);
       var image = {
         url: './images/earthquake.png',
         size: new google.maps.Size(20, 32),
@@ -39,8 +38,8 @@ $(document).ready(function() {
   }
 
   function mapSuccess(response){
-    for(let i = 0; i < response.features.length; i++){
-    mapTitles = response.features[i].properties.place
+    for(let i = 0; i < response.length; i++){
+    mapTitles = JSON.parse(response[i].address).address
     $('#info').append("<p>" + mapTitles +"</p>")
     }
     initMap(response);
