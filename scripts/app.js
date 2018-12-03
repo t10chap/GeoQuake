@@ -1,28 +1,33 @@
-// define globals
-var weekly_quakes_endpoint = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
+var quakes_endpoint = "http://geocoder.default.dev.gswkbook.com";
 
 $(document).ready(function() {
-  console.log("Let's get coding!");
-
   $.ajax({
-    url: weekly_quakes_endpoint,
+    url: quakes_endpoint,
     method: 'GET',
     success: mapSuccess,
     error: mapError
   })
 
+  $("#find").submit(function(event) {
+    event.preventDefault();
+    $.ajax({
+      url: quakes_endpoint,
+      method: 'GET',
+      success: remap,
+      error: mapError
+    })
+  })
+
   var mapTitles;
   var pinLocation;
 
-  // //functions
   function initMap(response) {
     var map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 37.78, lng: -122.44},
       zoom: 2
     });
-    for(let i = 0; i < response.features.length; i++){
-      pinLocation = response.features[i].geometry.coordinates;
-      var latLng = new google.maps.LatLng(pinLocation[1],pinLocation[0]);
+    for(let i = 0; i < response.length; i++){
+      var latLng = new google.maps.LatLng(response[i].lat,response[i].lon);
       var image = {
         url: './images/earthquake.png',
         size: new google.maps.Size(20, 32),
@@ -38,18 +43,33 @@ $(document).ready(function() {
     };
   }
 
-  function mapSuccess(response){
-    for(let i = 0; i < response.features.length; i++){
-    mapTitles = response.features[i].properties.place
-    $('#info').append("<p>" + mapTitles +"</p>")
+  function mapSuccess(response) {
+    for(let i = 0; i < response.length; i++){
+      mapTitles = JSON.parse(response[i].address).address
+      magnitude = JSON.parse(response[i].mag).mag
+      $('#info').append(`<p id=${magnitude}>  ${mapTitles} </p>`)
     }
     initMap(response);
     console.log(response);
   };
 
-  function mapError(error1, error2, error3){
+  function mapError(error1, error2, error3) {
     console.log(error1);
     console.log(error2);
     console.log(error3);
   };
+
+  function remap(response) {
+    $("#info").empty();
+    var minimumMag = $(".mag").val();
+    for(let i = 0; i < response.features.length; i++){
+      mapTitles = JSON.parse(response[i].address).address
+      magnitude = JSON.parse(response[i].mag).mag
+      if(magnitude >= minimumMag) {
+        $('#info').append(`<p id=${magnitude}>  ${mapTitles} </p>`)
+      }
+    }
+    initMap(response);
+    console.log(response);
+  }
 });
