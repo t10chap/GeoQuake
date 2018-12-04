@@ -47,11 +47,17 @@ $(document).ready(function() {
   };
 
   function mapSuccess(response) {
+
+    var response = response.sort(function(a, b) {
+      return (a.mag > b.mag) ? -1 : ((b.mag > a.mag) ? 1 : 0)
+    });
+    
     console.log(response.length);
     for(let i = 0; i < response.length; i++){
       mapTitles = JSON.parse(response[i].address).address
       var magnitude = response[i].mag;
-      $('#info').append(`<p id=${magnitude}>  ${mapTitles} </p>`)
+      var id = response[i].id;
+      $('#info').append(`<p id=${id}> (${magnitude}) ${mapTitles} </p>`)
     };
     initMap(response, minimumMag);
     console.log(response);
